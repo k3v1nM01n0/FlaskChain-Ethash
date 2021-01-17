@@ -81,11 +81,23 @@ blockchain = Blockchain()
 
 @app.route('/chain', methods=['GET'])
 def get_chain():
-    chain_data = []
+    chain_data = {}
+    count = 1
+
     for block in blockchain.chain:
-        chain_data.append(block.__dict__)
-    return json.dumps({"length": len(chain_data),
-                    "chain": chain_data})
+        chain_data['chain: {}'.format(count)] = block.__dict__
+        count += 1
+    return chain_data
+        
+
+@app.route('/mine', methods=['GET'])
+def get_mine():
+    transaction = ''
+    blockchain.add_new_transaction(transaction)
+    blockchain.mine()
+    block_data = blockchain.chain[-1].__dict__
+    return block_data
+
 
 
 app.run(debug=True, port=5000)
