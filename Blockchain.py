@@ -2,6 +2,7 @@ from hashlib import sha256
 import json
 import time
 import pyethash
+import json
 
 
 from flask import Flask, request
@@ -100,6 +101,16 @@ def get_mine():
     blockchain.mine()
     block_data = blockchain.chain[-1].__dict__
     return block_data
+
+
+@app.route('/block/<int:index>', methods=['GET'])
+def get_block(index):
+    if index < len(blockchain.chain):
+        block = blockchain.chain[index]
+        return json.dumps(block.__dict__)
+    else:
+        return 'Block not found', 404
+
 
 
 
