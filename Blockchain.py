@@ -112,6 +112,14 @@ def get_block(index):
         return 'Block not found', 404
 
 
+@app.route('/transaction/<int:index>', methods=['GET'])
+def get_transaction(index):
+    for block in blockchain.chain:
+        if len(block.transactions) > index:
+            return json.dumps(block.transactions[index])
+    return 'Transaction not found', 404
+
+
 
 
 app.run(debug=True, port=5000)
