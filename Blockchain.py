@@ -1,6 +1,8 @@
 from hashlib import sha256
 import json
 import time
+import pyethash
+
 
 from flask import Flask, request
 import requests
@@ -36,11 +38,12 @@ class Blockchain:
     difficulty = 2
     def proof_of_work(self, block):
         block.nonce = 0
-        computed_hash = block.compute_hash()
-        while not computed_hash.startswith('0' * Blockchain.difficulty):
+        while True:
+            mix_digest = pyethash.get_mix_digest(block.nonce, block.timestamp)
+            if int.from_bytes(mix_digest, byteorder='big') < DIFFICULTY:
+                return block.nonce
             block.nonce += 1
-            computed_hash = block.compute_hash()
-        return computed_hash
+
 
     def add_block(self, block, proof):
         previous_hash = self.last_block.hash
