@@ -92,42 +92,56 @@ def get_chain():
         chain_data['chain: {}'.format(count)] = block.__dict__
         count += 1
     return chain_data
-        
+
 
 @app.route('/mine', methods=['GET'])
 def get_mine():
-    transaction = ''
-    blockchain.add_new_transaction(transaction)
+    if not blockchain.unconfirmed_transactions:
+        return 'No transactions to mine', 400
     blockchain.mine()
     block_data = blockchain.chain[-1].__dict__
-    return block_data
+    return json.dumps(block_data)
 
 
 @app.route('/block/<int:index>', methods=['GET'])
 def get_block(index):
-    if index < len(blockchain.chain):
-        block = blockchain.chain[index]
-        return json.dumps(block.__dict__)
-    else:
+    if index < 0:
+        return 'Invalid block index', 400
+    if index >= len(blockchain.chain):
         return 'Block not found', 404
+    block = blockchain.chain[index]
+    return json.dumps(block.__dict__)
 
 
 @app.route('/transaction/<int:index>', methods=['GET'])
 def get_transaction(index):
+    if index < 0:
+        return 'Invalid transaction index', 400
     for block in blockchain.chain:
         if len(block.transactions) > index:
             return json.dumps(block.transactions[index])
     return 'Transaction not found', 404
 
 
+@app.route('/add_transaction', methods=['POST'])
+def add_transaction():
+    if not request.is_json:
+        return 'Invalid request, expected JSON', 400
+    transaction = request.get_json()
+    if not transaction:
+        return 'Invalid transaction', 400
+    blockchain.add_new_transaction(transaction)
+    return 'Transaction added', 201
+
+
 @app.route('/block/<int:index>', methods=['DELETE'])
 def delete_block(index):
-    if index < len(blockchain.chain):
-        blockchain.chain.pop(index)
-        return 'Block deleted successfully', 200
-    else:
+    if index < 1:
+        return 'Cannot delete genesis block', 400
+    if index >= len(blockchain.chain):
         return 'Block not found', 404
-
+    blockchain.chain.pop(index)
+    return 'Block deleted', 200
 
 
 
