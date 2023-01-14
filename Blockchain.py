@@ -120,6 +120,15 @@ def get_transaction(index):
     return 'Transaction not found', 404
 
 
+@app.route('/block/<int:index>', methods=['DELETE'])
+def delete_block(index):
+    if index < len(blockchain.chain):
+        blockchain.chain.pop(index)
+        return 'Block deleted successfully', 200
+    else:
+        return 'Block not found', 404
+
+
 
 
 app.run(debug=True, port=5000)
